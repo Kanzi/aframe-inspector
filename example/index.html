@@ -17,8 +17,8 @@
         <a-mixin id="purple" material="color: #93648D"></a-mixin>
         <a-mixin id="short" scale="1 0.5 1"></a-mixin>
         <a-mixin id="yellow" material="color: #FFC65D"></a-mixin>
-        <img id="crateImg" src="assets/textures/crate.gif">
-        <img id="floorImg" src="assets/textures/grasslight-big.jpg">
+        <img id="crateImg" src="https://aframe.io/sample-assets/assets/images/wood/crate.gif" crossOrigin="true">
+        <img id="floorImg" src="https://aframe.io/sample-assets/assets/images/terrain/grasslight-big.jpg" crossOrigin="true">
       </a-assets>
 
       <!-- Meshes. -->
@@ -29,12 +29,12 @@
         <a-animation attribute="rotation" to="0 360 0" repeat="indefinite" easing="linear" dur="9600"></a-animation>
       </a-entity>
       <a-entity id="yellowSphere" geometry="primitive: sphere" material="color:#ff0; metalness:0.0; roughness:1.0" position="-2 2 -2"></a-entity>
-      <a-box src="assets/textures/brick_bump.jpg" position="-5 5 -2" width="1" color="#F16745"></a-box>
+      <a-box src="https://aframe.io/sample-assets/assets/images/bricks/brick_bump.jpg" position="-5 5 -2" width="1" color="#F16745"></a-box>
       <a-box id="box" position="0 2 0" height="2" color="#FFC65D"></a-box>
 
       <!-- Models. -->
-      <a-entity id="crate" geometry="primitive: box" material="src: #crateImg" position="3 4 0"></a-entity>
-      <a-entity id="greenBox" geometry="primitive: box" material="color: #0f0" position="4 2 4"></a-entity>
+      <a-entity geometry="primitive: box" material="src: #crateImg" position="3 4 0"></a-entity>
+      <a-entity geometry="primitive: box" material="color: #0f0" position="4 2 4"></a-entity>
 
       <!-- Floor. -->
       <a-entity id="floor" geometry="primitive: cylinder; height: .2; radius: 12"
@@ -55,7 +55,7 @@
         </a-entity>
       </a-entity>
 
-      <a-sky color="#333"></a-sky>
+      <a-sky color="#3c3c3c"></a-sky>
     </a-scene>
 
     <script src="../dist/aframe-inspector.js"></script>
