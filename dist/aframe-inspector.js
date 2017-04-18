@@ -71,25 +71,25 @@
 
 	var _Sidebar2 = _interopRequireDefault(_Sidebar);
 
-	var _ModalTextures = __webpack_require__(236);
+	var _ModalTextures = __webpack_require__(239);
 
 	var _ModalTextures2 = _interopRequireDefault(_ModalTextures);
 
-	var _ModalHelp = __webpack_require__(240);
+	var _ModalHelp = __webpack_require__(243);
 
 	var _ModalHelp2 = _interopRequireDefault(_ModalHelp);
 
-	var _SceneGraph = __webpack_require__(241);
+	var _SceneGraph = __webpack_require__(244);
 
 	var _SceneGraph2 = _interopRequireDefault(_SceneGraph);
 
-	var _ToolBar = __webpack_require__(244);
+	var _ToolBar = __webpack_require__(247);
 
 	var _ToolBar2 = _interopRequireDefault(_ToolBar);
 
 	var _utils = __webpack_require__(205);
 
-	__webpack_require__(245);
+	__webpack_require__(248);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -100,7 +100,7 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	/* global VERSION BUILD_TIMESTAMP COMMIT_HASH */
-	__webpack_require__(247);
+	__webpack_require__(250);
 	var INSPECTOR = __webpack_require__(200);
 
 	THREE.ImageUtils.crossOrigin = '';
@@ -258,7 +258,7 @@
 
 	(function init() {
 	  var webFontLoader = document.createElement('script');
-	  webFontLoader.innerHTML = 'WebFont.load({google: {families: ["Roboto Mono"]}});';
+	  webFontLoader.innerHTML = 'WebFont.load({google: {families: ["Roboto", "Roboto Mono"]}});';
 
 	  var webFont = document.createElement('script');
 	  webFont.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js';
@@ -277,9 +277,7 @@
 	  window.addEventListener('inspector-loaded', function () {
 	    _reactDom2.default.render(_react2.default.createElement(Main, null), div);
 	  });
-	  AFRAME.INSPECTOR = INSPECTOR;
-
-	  console.log('A-Frame Inspector Version:', ("0.5.1"), '(' + ("14-02-2017") + ' Commit: ' + ("3ebfeefaea1cc120eb0f3483f5e0f7ab824afd47\n").substr(0, 7) + ')');
+	  console.log('A-Frame Inspector Version:', ("0.5.1"), '(' + ("18-04-2017") + ' Commit: ' + ("66020eedc69e51a3937a8b18c34b5697eab0d46d\n").substr(0, 7) + ')');
 	})();
 
 /***/ },
@@ -21726,15 +21724,15 @@
 
 	var _AddComponent2 = _interopRequireDefault(_AddComponent);
 
-	var _Component = __webpack_require__(211);
+	var _Component = __webpack_require__(214);
 
 	var _Component2 = _interopRequireDefault(_Component);
 
-	var _CommonComponents = __webpack_require__(232);
+	var _CommonComponents = __webpack_require__(235);
 
 	var _CommonComponents2 = _interopRequireDefault(_CommonComponents);
 
-	var _DefaultComponents = __webpack_require__(234);
+	var _DefaultComponents = __webpack_require__(237);
 
 	var _DefaultComponents2 = _interopRequireDefault(_DefaultComponents);
 
@@ -21832,6 +21830,9 @@
 
 	var INSPECTOR = __webpack_require__(200);
 
+
+	var DELIMITER = ' ';
+
 	var AddComponent = function (_React$Component) {
 	  _inherits(AddComponent, _React$Component);
 
@@ -21854,7 +21855,7 @@
 	      })[0];
 
 	      if (selectedOption.origin === 'registry') {
-	        var _selectedOption$value = selectedOption.value.split('.');
+	        var _selectedOption$value = selectedOption.value.split(DELIMITER);
 
 	        var _selectedOption$value2 = _slicedToArray(_selectedOption$value, 2);
 
@@ -21911,7 +21912,7 @@
 	        });
 	      });
 	      var registryOptions = registryComponents.map(function (item) {
-	        return { value: item.componentPackageName + '.' + item.componentName,
+	        return { value: item.componentPackageName + DELIMITER + item.componentName,
 	          label: item.componentName, origin: 'registry' };
 	      });
 
@@ -25008,6 +25009,7 @@
 	var Shortcuts = __webpack_require__(209);
 
 	function Inspector() {
+	  this.modules = [];
 	  this.opened = false;
 	  // Detect if the scene is already loaded
 	  if (document.readyState === 'complete' || document.readyState === 'loaded') {
@@ -25055,10 +25057,20 @@
 	    this.inspectorCameraEl.addEventListener('loaded', function (entity) {
 	      _this.EDITOR_CAMERA = _this.inspectorCameraEl.getObject3D('camera');
 	      _this.initUI();
+	      _this.initModules();
 	    });
 	    this.inspectorCameraEl.setAttribute('camera', { far: 10000, fov: 50, near: 0.05, active: true });
 	    document.querySelector('a-scene').appendChild(this.inspectorCameraEl);
 	  },
+
+	  initModules: function initModules() {
+	    for (var moduleName in this.modules) {
+	      var module = this.modules[moduleName];
+	      console.log('Initializing module <%s>', moduleName);
+	      module.init(this.sceneEl);
+	    }
+	  },
+
 	  initUI: function initUI() {
 	    var _this2 = this;
 
@@ -25349,7 +25361,12 @@
 	  }
 	};
 
-	module.exports = new Inspector();
+	var inspector = new Inspector();
+	AFRAME.INSPECTOR = inspector;
+
+	var Modules = __webpack_require__(211);
+
+	module.exports = inspector;
 
 /***/ },
 /* 201 */
@@ -25400,7 +25417,11 @@
 	      if (event.detail.cameraEl !== inspector.inspectorCameraEl) {
 	        prevActivedCameraEl = event.detail.cameraEl;
 	      }
-	      inspector.inspectorCameraEl.setAttribute('camera', 'active', 'true');
+
+	      // If it's an inspector camera we just leave the active status as is
+	      if (!event.detail.cameraEl.isInspector) {
+	        inspector.inspectorCameraEl.setAttribute('camera', 'active', 'true');
+	      }
 	    }
 	  });
 
@@ -25564,12 +25585,25 @@
 	    if (onDownPosition.distanceTo(onUpPosition) === 0) {
 	      var intersects = getIntersects(onUpPosition, objects);
 	      if (intersects.length > 0) {
-	        var object = intersects[0].object;
-	        if (object.userData.object !== undefined) {
-	          // helper
-	          inspector.selectEntity(object.userData.object.el);
-	        } else {
-	          inspector.selectEntity(object.el);
+	        var selected = false;
+	        for (var i = 0; i < intersects.length; i++) {
+	          var object = intersects[i].object;
+	          if (!object.el.getAttribute('visible')) {
+	            continue;
+	          }
+
+	          selected = true;
+
+	          if (object.userData.object !== undefined) {
+	            // helper
+	            inspector.selectEntity(object.userData.object.el);
+	          } else {
+	            inspector.selectEntity(object.el);
+	          }
+	        }
+
+	        if (!selected) {
+	          inspector.selectEntity(null);
 	        }
 	      } else {
 	        inspector.selectEntity(null);
@@ -27483,7 +27517,7 @@
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 	function getNumber(value) {
-	  return parseFloat(value.toFixed(2));
+	  return parseFloat(value.toFixed(3));
 	}
 
 	function getMajorVersion(version) {
@@ -27787,58 +27821,74 @@
 	}
 
 	module.exports = {
+	  shortcuts: {
+	    default: {},
+	    modules: {}
+	  },
 	  onKeyUp: function onKeyUp(event) {
 	    if (!shouldCaptureKeyEvent(event)) {
 	      return;
 	    }
 
+	    var keyCode = event.keyCode;
+
 	    // h: help
-	    if (event.keyCode === 72) {
+	    if (keyCode === 72) {
 	      Events.emit('openhelpmodal');
 	    }
 
 	    // esc: close inspector
-	    if (event.keyCode === 27) {
+	    if (keyCode === 27) {
 	      AFRAME.INSPECTOR.close();
 	      return;
 	    }
 
 	    // w: translate
-	    if (event.keyCode === 87) {
+	    if (keyCode === 87) {
 	      Events.emit('transformmodechanged', 'translate');
 	    }
 
 	    // e: rotate
-	    if (event.keyCode === 69) {
+	    if (keyCode === 69) {
 	      Events.emit('transformmodechanged', 'rotate');
 	    }
 
 	    // r: scale
-	    if (event.keyCode === 82) {
+	    if (keyCode === 82) {
 	      Events.emit('transformmodechanged', 'scale');
 	    }
 
 	    // g: toggle grid
-	    if (event.keyCode === 71) {
+	    if (keyCode === 71) {
 	      Events.emit('togglegrid');
 	    }
 
 	    // n: new entity
-	    if (event.keyCode === 78) {
+	    if (keyCode === 78) {
 	      Events.emit('createnewentity', { element: 'a-entity', components: {} });
 	    }
 
 	    // backspace & supr: remove selected entity
-	    if (event.keyCode === 8 || event.keyCode === 46) {
+	    if (keyCode === 8 || keyCode === 46) {
 	      (0, _entity.removeSelectedEntity)();
 	    }
 
 	    // d: clone selected entity
-	    if (event.keyCode === 68) {
+	    if (keyCode === 68) {
 	      (0, _entity.cloneSelectedEntity)();
+	    }
+
+	    for (var moduleName in this.shortcuts.modules) {
+	      var shortcutsModule = this.shortcuts.modules[moduleName];
+	      if (shortcutsModule[keyCode] && (!shortcutsModule[keyCode].mustBeActive || shortcutsModule[keyCode].mustBeActive && AFRAME.INSPECTOR.modules[moduleName].active)) {
+	        this.shortcuts.modules[moduleName][keyCode].callback();
+	      }
 	    }
 	  },
 	  onKeyDown: function onKeyDown(event) {
+	    if (!shouldCaptureKeyEvent(event)) {
+	      return;
+	    }
 
 	    if (event.ctrlKey && _utils.os === 'windows' || event.metaKey && _utils.os === 'macos') {
 	      if (AFRAME.INSPECTOR.selectedEntity && document.activeElement.tagName !== 'INPUT') {
@@ -27866,8 +27916,9 @@
 	        document.getElementById('filter').focus();
 	      }
 	    }
-	    // tab: toggle sidebars visibility
-	    if (event.keyCode === 9) {
+
+	    // º: toggle sidebars visibility
+	    if (event.keyCode === 192) {
 	      Events.emit('togglesidebar', { which: 'all' });
 	      event.preventDefault();
 	      event.stopPropagation();
@@ -27884,12 +27935,35 @@
 	    }
 	  },
 	  enable: function enable() {
-	    window.addEventListener('keydown', this.onKeyDown, false);
-	    window.addEventListener('keyup', this.onKeyUp, false);
+	    window.addEventListener('keydown', this.onKeyDown.bind(this), false);
+	    window.addEventListener('keyup', this.onKeyUp.bind(this), false);
 	  },
 	  disable: function disable() {
 	    window.removeEventListener('keydown', this.onKeyDown);
 	    window.removeEventListener('keyup', this.onKeyUp);
+	  },
+	  checkModuleShortcutCollision: function checkModuleShortcutCollision(keyCode, moduleName, mustBeActive) {
+	    if (this.shortcuts.modules[moduleName] && this.shortcuts.modules[moduleName][keyCode]) {
+	      console.warn('Keycode <%s> already registered as shorcut within the same module', keyCode);
+	    }
+	  },
+	  registerModuleShortcut: function registerModuleShortcut(keyCode, callback, moduleName, mustBeActive) {
+	    if (this.checkModuleShortcutCollision(keyCode, moduleName, mustBeActive)) {
+	      return;
+	    }
+
+	    if (!this.shortcuts.modules[moduleName]) {
+	      this.shortcuts.modules[moduleName] = {};
+	    }
+
+	    if (mustBeActive !== false) {
+	      mustBeActive = true;
+	    }
+
+	    this.shortcuts.modules[moduleName][keyCode] = {
+	      callback: callback,
+	      mustBeActive: mustBeActive
+	    };
 	  }
 	};
 
@@ -28164,6 +28238,79 @@
 
 	'use strict';
 
+	__webpack_require__(212);
+
+/***/ },
+/* 212 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var registerModule = __webpack_require__(213).registerModule;
+
+	registerModule('dummy', {
+	  init: function init() {
+	    var _this = this;
+
+	    this.registerShortcut(80, function () {
+	      _this.toggleActive();
+	    }, false);
+	  },
+	  activate: function activate() {
+	    console.log('Module activated');
+	  },
+	  deactivate: function deactivate() {
+	    console.log('Module deactivated');
+	  }
+	});
+
+/***/ },
+/* 213 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var Shortcuts = __webpack_require__(209);
+
+	module.exports.registerModule = function registerModule(name, definition) {
+	  name = name.toLowerCase();
+	  console.log('Registering module: <%s>', name);
+
+	  var common = {
+	    status: {
+	      active: false
+	    },
+	    registerShortcut: function registerShortcut(keyCode, callback, mustBeActive) {
+	      Shortcuts.registerModuleShortcut(keyCode, callback, this.moduleName, mustBeActive);
+	    },
+	    toggleActive: function toggleActive() {
+	      if (this.active) {
+	        this.deactivate();
+	      } else {
+	        this.activate();
+	      }
+	    },
+	    activate: function activate() {
+	      this.active = true;
+	      definition.activate.call(this);
+	    },
+	    deactivate: function deactivate() {
+	      this.active = false;
+	      definition.deactivate.call(this);
+	    }
+	  };
+
+	  var newModule = Object.assign({}, definition, common);
+
+	  AFRAME.INSPECTOR.modules[name] = newModule;
+	};
+
+/***/ },
+/* 214 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
@@ -28174,19 +28321,19 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _PropertyRow = __webpack_require__(212);
+	var _PropertyRow = __webpack_require__(215);
 
 	var _PropertyRow2 = _interopRequireDefault(_PropertyRow);
 
-	var _Collapsible = __webpack_require__(223);
+	var _Collapsible = __webpack_require__(226);
 
 	var _Collapsible2 = _interopRequireDefault(_Collapsible);
 
-	var _clipboard = __webpack_require__(224);
+	var _clipboard = __webpack_require__(227);
 
 	var _clipboard2 = _interopRequireDefault(_clipboard);
 
-	var _component = __webpack_require__(222);
+	var _component = __webpack_require__(225);
 
 	var _Events = __webpack_require__(182);
 
@@ -28358,7 +28505,7 @@
 	exports.default = Component;
 
 /***/ },
-/* 212 */
+/* 215 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28379,45 +28526,45 @@
 
 	var _lodash2 = _interopRequireDefault(_lodash);
 
-	var _BooleanWidget = __webpack_require__(213);
+	var _BooleanWidget = __webpack_require__(216);
 
 	var _BooleanWidget2 = _interopRequireDefault(_BooleanWidget);
 
-	var _ColorWidget = __webpack_require__(214);
+	var _ColorWidget = __webpack_require__(217);
 
 	var _ColorWidget2 = _interopRequireDefault(_ColorWidget);
 
-	var _InputWidget = __webpack_require__(215);
+	var _InputWidget = __webpack_require__(218);
 
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 
-	var _NumberWidget = __webpack_require__(216);
+	var _NumberWidget = __webpack_require__(219);
 
 	var _NumberWidget2 = _interopRequireDefault(_NumberWidget);
 
-	var _SelectWidget = __webpack_require__(217);
+	var _SelectWidget = __webpack_require__(220);
 
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 
-	var _TextureWidget = __webpack_require__(218);
+	var _TextureWidget = __webpack_require__(221);
 
 	var _TextureWidget2 = _interopRequireDefault(_TextureWidget);
 
-	var _Vec4Widget = __webpack_require__(219);
+	var _Vec4Widget = __webpack_require__(222);
 
 	var _Vec4Widget2 = _interopRequireDefault(_Vec4Widget);
 
-	var _Vec3Widget = __webpack_require__(220);
+	var _Vec3Widget = __webpack_require__(223);
 
 	var _Vec3Widget2 = _interopRequireDefault(_Vec3Widget);
 
-	var _Vec2Widget = __webpack_require__(221);
+	var _Vec2Widget = __webpack_require__(224);
 
 	var _Vec2Widget2 = _interopRequireDefault(_Vec2Widget);
 
 	var _entity = __webpack_require__(210);
 
-	var _component = __webpack_require__(222);
+	var _component = __webpack_require__(225);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -28551,7 +28698,7 @@
 	exports.default = PropertyRow;
 
 /***/ },
-/* 213 */
+/* 216 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28622,7 +28769,7 @@
 	exports.default = BooleanWidget;
 
 /***/ },
-/* 214 */
+/* 217 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28735,7 +28882,7 @@
 	exports.default = ColorWidget;
 
 /***/ },
-/* 215 */
+/* 218 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28801,7 +28948,7 @@
 	exports.default = InputWidget;
 
 /***/ },
-/* 216 */
+/* 219 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28839,11 +28986,9 @@
 	      _this.distance += delta;
 
 	      // Add minimum tolerance to reduce unintentional drags when clicking on input.
-	      if (Math.abs(delta) <= 2) {
-	        return;
-	      }
+	      //if (Math.abs(delta) <= 2) { return; }
 
-	      var value = _this.onMouseDownValue + _this.distance / (event.shiftKey ? 5 : 50) * _this.props.step;
+	      var value = _this.onMouseDownValue + _this.distance / (event.shiftKey ? 5 : 50) * _this.props.step / 2;
 	      value = Math.min(_this.props.max, Math.max(_this.props.min, value));
 	      if (currentValue !== value) {
 	        _this.setValue(value);
@@ -28974,13 +29119,13 @@
 	  min: -Infinity,
 	  max: Infinity,
 	  value: 0,
-	  precision: 2,
+	  precision: 3,
 	  step: 1
 	};
 	exports.default = NumberWidget;
 
 /***/ },
-/* 217 */
+/* 220 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29078,7 +29223,7 @@
 	exports.default = SelectWidget;
 
 /***/ },
-/* 218 */
+/* 221 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29334,7 +29479,7 @@
 	exports.default = TextureWidget;
 
 /***/ },
-/* 219 */
+/* 222 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29351,7 +29496,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _NumberWidget = __webpack_require__(216);
+	var _NumberWidget = __webpack_require__(219);
 
 	var _NumberWidget2 = _interopRequireDefault(_NumberWidget);
 
@@ -29427,7 +29572,7 @@
 	exports.default = Vec4Widget;
 
 /***/ },
-/* 220 */
+/* 223 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29444,7 +29589,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _NumberWidget = __webpack_require__(216);
+	var _NumberWidget = __webpack_require__(219);
 
 	var _NumberWidget2 = _interopRequireDefault(_NumberWidget);
 
@@ -29518,7 +29663,7 @@
 	exports.default = Vec3Widget;
 
 /***/ },
-/* 221 */
+/* 224 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29535,7 +29680,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _NumberWidget = __webpack_require__(216);
+	var _NumberWidget = __webpack_require__(219);
 
 	var _NumberWidget2 = _interopRequireDefault(_NumberWidget);
 
@@ -29607,7 +29752,7 @@
 	exports.default = Vec2Widget;
 
 /***/ },
-/* 222 */
+/* 225 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29700,7 +29845,7 @@
 	}
 
 /***/ },
-/* 223 */
+/* 226 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29795,12 +29940,12 @@
 	exports.default = Collapsible;
 
 /***/ },
-/* 224 */
+/* 227 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, __webpack_require__(225), __webpack_require__(227), __webpack_require__(228)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, __webpack_require__(228), __webpack_require__(230), __webpack_require__(231)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
 	        factory(module, require('./clipboard-action'), require('tiny-emitter'), require('good-listener'));
 	    } else {
@@ -29985,12 +30130,12 @@
 	});
 
 /***/ },
-/* 225 */
+/* 228 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, __webpack_require__(226)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, __webpack_require__(229)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
 	        factory(module, require('select'));
 	    } else {
@@ -30219,7 +30364,7 @@
 	});
 
 /***/ },
-/* 226 */
+/* 229 */
 /***/ function(module, exports) {
 
 	function select(element) {
@@ -30258,7 +30403,7 @@
 
 
 /***/ },
-/* 227 */
+/* 230 */
 /***/ function(module, exports) {
 
 	function E () {
@@ -30330,11 +30475,11 @@
 
 
 /***/ },
-/* 228 */
+/* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var is = __webpack_require__(229);
-	var delegate = __webpack_require__(230);
+	var is = __webpack_require__(232);
+	var delegate = __webpack_require__(233);
 
 	/**
 	 * Validates all params and calls the right
@@ -30431,7 +30576,7 @@
 
 
 /***/ },
-/* 229 */
+/* 232 */
 /***/ function(module, exports) {
 
 	/**
@@ -30486,10 +30631,10 @@
 
 
 /***/ },
-/* 230 */
+/* 233 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var closest = __webpack_require__(231);
+	var closest = __webpack_require__(234);
 
 	/**
 	 * Delegates event to a selector.
@@ -30536,7 +30681,7 @@
 
 
 /***/ },
-/* 231 */
+/* 234 */
 /***/ function(module, exports) {
 
 	/**
@@ -30570,7 +30715,7 @@
 
 
 /***/ },
-/* 232 */
+/* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -30585,21 +30730,21 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _widgets = __webpack_require__(233);
+	var _widgets = __webpack_require__(236);
 
-	var _DefaultComponents = __webpack_require__(234);
+	var _DefaultComponents = __webpack_require__(237);
 
 	var _DefaultComponents2 = _interopRequireDefault(_DefaultComponents);
 
-	var _PropertyRow = __webpack_require__(212);
+	var _PropertyRow = __webpack_require__(215);
 
 	var _PropertyRow2 = _interopRequireDefault(_PropertyRow);
 
-	var _Collapsible = __webpack_require__(223);
+	var _Collapsible = __webpack_require__(226);
 
 	var _Collapsible2 = _interopRequireDefault(_Collapsible);
 
-	var _Mixins = __webpack_require__(235);
+	var _Mixins = __webpack_require__(238);
 
 	var _Mixins2 = _interopRequireDefault(_Mixins);
 
@@ -30609,7 +30754,7 @@
 
 	var _Events2 = _interopRequireDefault(_Events);
 
-	var _clipboard = __webpack_require__(224);
+	var _clipboard = __webpack_require__(227);
 
 	var _clipboard2 = _interopRequireDefault(_clipboard);
 
@@ -30733,25 +30878,25 @@
 	exports.default = CommonComponents;
 
 /***/ },
-/* 233 */
+/* 236 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	module.exports = {
-	  BooleanWidget: __webpack_require__(213).default,
-	  ColorWidget: __webpack_require__(214).default,
-	  InputWidget: __webpack_require__(215).default,
-	  NumberWidget: __webpack_require__(216).default,
-	  SelectWidget: __webpack_require__(217).default,
-	  TextureWidget: __webpack_require__(218).default,
-	  Vec4Widget: __webpack_require__(219).default,
-	  Vec3Widget: __webpack_require__(220).default,
-	  Vec2Widget: __webpack_require__(221).default
+	  BooleanWidget: __webpack_require__(216).default,
+	  ColorWidget: __webpack_require__(217).default,
+	  InputWidget: __webpack_require__(218).default,
+	  NumberWidget: __webpack_require__(219).default,
+	  SelectWidget: __webpack_require__(220).default,
+	  TextureWidget: __webpack_require__(221).default,
+	  Vec4Widget: __webpack_require__(222).default,
+	  Vec3Widget: __webpack_require__(223).default,
+	  Vec2Widget: __webpack_require__(224).default
 	};
 
 /***/ },
-/* 234 */
+/* 237 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -30762,7 +30907,7 @@
 	exports.default = ['visible', 'position', 'scale', 'rotation'];
 
 /***/ },
-/* 235 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -30916,7 +31061,7 @@
 	exports.default = Mixin;
 
 /***/ },
-/* 236 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -30935,7 +31080,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Modal = __webpack_require__(237);
+	var _Modal = __webpack_require__(240);
 
 	var _Modal2 = _interopRequireDefault(_Modal);
 
@@ -30943,7 +31088,7 @@
 
 	var _inspector2 = _interopRequireDefault(_inspector);
 
-	var _uploadcare = __webpack_require__(238);
+	var _uploadcare = __webpack_require__(241);
 
 	var _uploadcare2 = _interopRequireDefault(_uploadcare);
 
@@ -30958,7 +31103,7 @@
 	/* global uploadcare */
 	window.UPLOADCARE_PUBLIC_KEY = 'f43ad452b58f9e853d05';
 
-	var insertNewAsset = __webpack_require__(239).insertNewAsset;
+	var insertNewAsset = __webpack_require__(242).insertNewAsset;
 
 
 	function getFilename(url) {
@@ -31481,7 +31626,7 @@
 	exports.default = ModalTextures;
 
 /***/ },
-/* 237 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31617,7 +31762,7 @@
 	exports.default = Modal;
 
 /***/ },
-/* 238 */
+/* 241 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31637,7 +31782,7 @@
 	}
 
 /***/ },
-/* 239 */
+/* 242 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -31671,7 +31816,7 @@
 	};
 
 /***/ },
-/* 240 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31686,7 +31831,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Modal = __webpack_require__(237);
+	var _Modal = __webpack_require__(240);
 
 	var _Modal2 = _interopRequireDefault(_Modal);
 
@@ -31779,7 +31924,7 @@
 	exports.default = ModalHelp;
 
 /***/ },
-/* 241 */
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31804,7 +31949,7 @@
 
 	var _entity = __webpack_require__(210);
 
-	var _Toolbar = __webpack_require__(242);
+	var _Toolbar = __webpack_require__(245);
 
 	var _Toolbar2 = _interopRequireDefault(_Toolbar);
 
@@ -32154,7 +32299,7 @@
 	exports.default = SceneGraph;
 
 /***/ },
-/* 242 */
+/* 245 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -32169,11 +32314,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _clipboard = __webpack_require__(224);
+	var _clipboard = __webpack_require__(227);
 
 	var _clipboard2 = _interopRequireDefault(_clipboard);
 
-	var _exporter = __webpack_require__(243);
+	var _exporter = __webpack_require__(246);
 
 	var _Events = __webpack_require__(182);
 
@@ -32257,7 +32402,7 @@
 	exports.default = Toolbar;
 
 /***/ },
-/* 243 */
+/* 246 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -32332,7 +32477,7 @@
 	}
 
 /***/ },
-/* 244 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -32440,13 +32585,13 @@
 	exports.default = Toolbar;
 
 /***/ },
-/* 245 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(246);
+	var content = __webpack_require__(249);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
 	var update = __webpack_require__(199)(content, {});
@@ -32466,7 +32611,7 @@
 	}
 
 /***/ },
-/* 246 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(198)();
@@ -32474,13 +32619,13 @@
 
 
 	// module
-	exports.push([module.id, "body.aframe-inspector-opened {\n  color: #fff;\n  font-family: 'Roboto', sans-serif;\n  font-size: 12px;\n  margin: 0;\n  overflow: hidden;\n}\n\nhr {\n  border: 0;\n  border-top: 1px solid #ccc;\n}\n\na {\n  cursor: pointer;\n}\n\nbutton {\n  position: relative;\n}\n\ncode {\n  font-family: Consolas, Andale Mono, Monaco, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;\n}\n\ntextarea {\n  -moz-tab-size: 4;\n    -o-tab-size: 4;\n       tab-size: 4;\n  white-space: pre;\n  word-wrap: normal;\n}\n\ntextarea.success {\n  border-color: #8b8 !important;\n}\n\ntextarea.fail {\n  background-color: rgba(255, 0, 0, 0.05);\n  border-color: #f00 !important;\n}\n\ntextarea,\ninput {\n  outline: none; /* osx */\n}\n\n#left-sidebar,\n#right-panels {\n  z-index: 9998;\n}\n\n#sidebar,\n#left-sidebar,\n.panel {\n  cursor: default;\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n}\n\n.collapsible .static {\n  margin: 0;\n}\n\n.collapsible .static .collapse-button {\n  border: 6px solid transparent;\n  float: left;\n  height: 0;\n  margin-right: 6px;\n  width: 0;\n}\n\n.collapsible.collapsed .static .collapse-button {\n  border-left-color: #1faaf2;\n  margin-top: 2px;\n}\n\n.collapsible:not(.collapsed) .static .collapse-button {\n  border-top-color: #1faaf2;\n  margin-top: 6px;\n}\n\n.collapsible.collapsed .content {\n  display: none;\n}\n\n.toggle-edit {\n  background-color: #ed3160;\n  color: #fff;\n  font-family: 'Roboto', sans-serif;\n  font-size: 12px;\n  left: 3px;\n  margin: 0;\n  padding: 6px 10px;\n  position: fixed;\n  text-align: center;\n  text-decoration: none;\n  top: 3px;\n  width: 204px;\n  z-index: 99999;\n}\n\n.toggle-edit:hover {\n  background-color: rgb(228, 43, 90);\n}\n\n.scenegraph {\n  border-top: 1px solid #111;\n  padding-top: 32px;\n}\n\n.scenegraph .search {\n  padding: 5px;\n}\n\n.scenegraph-toolbar {\n  background-color: #333;\n  position: fixed;\n  top: 32px;\n}\n\n.scenegraph-actions {\n  padding: 9px 0 5px;\n}\n\n.search {\n  color: #aaa;\n  font-size: 16px;\n  position: relative;\n}\n\n.search input {\n  background: #222;\n  border-radius: 5px;\n  height: 22px;\n  text-indent: 10px;\n  width: 216px;\n}\n\n.search .fa-search {\n  position: absolute;\n  right: 11px;\n  top: 10px;\n}\n\n.search .fa-times {\n  position: absolute;\n  right: 32px;\n  top: 10px;\n}\n\ninput {\n  background-color: transparent;\n  border: 1px solid #555;\n  color: #fff;\n}\n\ninput,\n.texture canvas {\n  -webkit-transition: 0.1s background-color ease-in-out, 0.1s border-color ease-in-out, 0.1s color ease-in-out;\n  transition: 0.1s background-color ease-in-out, 0.1s border-color ease-in-out, 0.1s color ease-in-out;\n}\n\ninput[type=text],\ninput[type=number],\ninput.string,\ninput.number {\n  min-height: 14px;\n  outline: none;\n}\n\ninput.number {\n  background-color: transparent !important;\n  border: 0;\n  color: #20b1fb !important;\n  cursor: col-resize;\n  font-size: 12px;\n  padding: 2px;\n}\n\ninput.string:focus,\ninput.number:focus {\n  border: 1px solid #20b1fb;\n  color: #fff;\n  cursor: auto;\n}\n\ninput.error {\n  border: 1px solid #a00;\n}\n\n#left-sidebar {\n  background: #2b2b2b;\n  bottom: 0;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  height: 100%;\n  left: 0;\n  overflow: auto;\n  position: fixed;\n  top: 0;\n  width: 230px;\n}\n\n#sidebar {\n  background: #2b2b2b;\n  width: 331px;\n}\n\n#sidebar * {\n  vertical-align: middle;\n}\n\ninput,\ntextarea,\nselect {\n  background: #222;\n  border: 1px solid transparent;\n  color: #888;\n}\n\n.row {\n  margin-bottom: 10px;\n  min-height: 20px;\n}\n\ninput[type=color] {\n  background-color: #333;\n  border: 1px solid #111;\n  cursor: pointer;\n}\n\n.texture canvas {\n  border: 1px solid #222;\n  cursor: pointer;\n}\n\n.texture canvas:hover {\n  border-color: #1faaf2;\n}\n\ninput[type=color] {\n  cursor: pointer;\n  height: 16px;\n  padding: 0;\n  width: 64px;\n}\n\n/* Note: these vendor-prefixed selectors cannot be grouped! */\n\ninput[type=color]::-webkit-color-swatch {\n  border: 0;  /* To remove the gray border. */\n}\n\ninput[type=color]::-webkit-color-swatch-wrapper {\n  padding: 0;  /* To remove the inner padding. */\n}\n\ninput[type=color]::-moz-color-swatch {\n  border: 0;\n}\n\ninput[type=color]::-moz-focus-inner {\n  border: 0;  /* To remove the inner border (specific to Firefox). */\n  padding: 0;\n}\n\n.components {\n  background-color: #323232;\n  color: #bcbcbc;\n  height: 100%;\n  overflow: auto;\n  position: fixed;\n  width: 331px;\n}\n\ndiv.vec2,\ndiv.vec3,\ndiv.vec4 {\n  display: inline;\n}\n\n.vec2 input.number,\n.vec3 input.number {\n  width: 46px;\n}\n\n.vec4 input.number {\n  width: 34px;\n}\n\n.collapsible-header {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n}\n\n.component-title span {\n  float: left;\n  max-width: 110px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  text-transform: uppercase;\n  white-space: nowrap;\n}\n\n.collapsible .static {\n  background-color: #323232;\n  border-bottom: 1px solid #262626;\n  border-top: 1px solid #262626;\n  color: #fff;\n  height: 16px;\n  padding: 10px;\n  vertical-align: middle;\n}\n\n.collapsible .menu {\n  text-align: right;\n}\n\n.collapsible .menu::after {\n  color: #bbb;\n  content: '\\2807';\n  font-size: 12px;\n  padding: 5px;\n  text-align: right;\n}\n\n.collapsible .static .collapse-button {\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  float: left;\n  height: 0;\n  margin-right: 10px;\n  margin-top: 2px;\n  width: 0;\n}\n\n.collapsible.collapsed .static .collapse-button {\n  border-left-color: #bbb;\n}\n\n.collapsible:not(.collapsed) .static .collapse-button {\n  border-top-color: #bbb;\n}\n\n.collapsible .content {\n  background-color: #2b2b2b;\n  padding: 10px;\n}\n\n.components .row {\n  margin-bottom: 10px;\n  min-height: 20px;\n}\n\n.components * {\n  vertical-align: middle;\n}\n\n.components .row .text {\n  cursor: default;\n  display: inline-block;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  vertical-align: middle;\n  width: 120px;\n}\n\n.components .row .map_value {\n  margin: 0 0 0 5px;\n  width: 68px;\n}\n\n.hidden {\n  visibility: hidden;\n}\n\n.uploader-normal-button .hidden {\n  display: none;\n}\n\n.texture canvas + input {\n  margin-left: 5px;\n}\n\n.texture .fa {\n  padding-right: 5px;\n}\n\n.texture .fa-external-link {\n  font-size: 14px;\n  padding-top: 2px;\n}\n\n.scenegraph-bottom {\n  background-color: #323232;\n  border-top: 1px solid #111;\n  bottom: 10;\n  height: 40px;\n  left: 0;\n  z-index: 100;\n}\n\na.button {\n  color: #bcbcbc;\n  font-size: 16px;\n  margin-left: 10px;\n  text-decoration: none;\n}\n\na.button:hover {\n  color: #1faaf2;\n}\n\n.scenegraph-bottom a {\n  float: right;\n  margin: 10px;\n}\n\n.modal {\n  -webkit-animation: animateopacity 0.2s ease-out;\n          animation: animateopacity 0.2s ease-out;\n  background-color: rgb(0, 0, 0);\n  background-color: rgba(0, 0, 0, 0.6);\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  height: 100%;\n  left: 0;\n  overflow: auto;\n  position: fixed;\n  top: 0;\n  width: 100%;\n  z-index: 9999;\n}\n\n.modal h3 {\n  font-size: 18px;\n  font-weight: 100;\n  margin: 0.6em 0;\n}\n\n#texture-modal .modal-content {\n  height: calc(100% - 50px);\n  width: calc(100% - 50px);\n}\n\n.modal-content {\n  -webkit-animation: animatetop 0.2s ease-out;\n          animation: animatetop 0.2s ease-out;\n  -webkit-animation-duration: 0.2s;\n          animation-duration: 0.2s;\n  -webkit-animation-name: animatetop;\n          animation-name: animatetop;\n  background-color: #232323;\n  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5), 0 6px 20px 0 rgba(0, 0, 0, 0.5);\n  margin: auto;\n  overflow: hidden;\n  padding: 0;\n}\n\n@-webkit-keyframes animateopacity {\n  from { opacity: 0; }\n  to { opacity: 1; }\n}\n\n@keyframes animateopacity {\n  from { opacity: 0; }\n  to { opacity: 1; }\n}\n\n.close {\n  color: white;\n  float: right;\n  font-size: 28px;\n  font-weight: bold;\n}\n\n.close:hover,\n.close:focus {\n  color: #08f;\n  cursor: pointer;\n  text-decoration: none;\n}\n\n.modal-header {\n  color: white;\n  padding: 2px 16px;\n}\n\n.modal-body {\n  overflow: auto;\n  padding: 16px;\n}\n\n.modal-footer {\n  color: white;\n  padding: 2px 16px;\n}\n\n/* Gallery */\n\n.gallery {\n  background: #232323;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  margin: 15px auto 0;\n  max-height: 50vh;\n  overflow: auto;\n  padding: 15px 3px 3px;\n}\n\n.newimage .gallery {\n  padding: 16px;\n}\n\n.gallery li {\n  border-radius: 2px;\n  box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);\n  cursor: pointer;\n  margin: 8px;\n  overflow: hidden;\n  width: 155px;\n}\n\n.gallery li.selected,\n.gallery li:hover {\n  box-shadow: 0 0 0 2px #1eaaf1;\n}\n\n.gallery li .detail {\n  background-color: #323232;\n  margin: 0;\n  min-height: 60px;\n  padding: 3px 10px;\n}\n\n.gallery li .button.fa-external-link {\n  margin-left: 136px;\n  margin-top: 5px;\n  position: fixed;\n}\n\n.preview {\n  padding: 10px;\n  width: 150px;\n}\n\n.preview input {\n  display: block;\n  margin: 8px 0;\n  width: 144px;\n}\n\n.preview button {\n  width: 155px;\n}\n\n.preview .detail .title {\n  color: #fff;\n  display: inline-block;\n  max-width: 155px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.gallery li.selected .detail,\n.gallery li:hover .detail {\n  background-color: #444;\n}\n\n.gallery li .detail span {\n  color: #777;\n  display: block;\n  margin-top: 4px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n  width: 140px;\n}\n\n.gallery li.selected .detail span,\n.gallery li:hover .detail span {\n  color: #888;\n}\n\n.gallery li .detail span.title {\n  color: #fff !important;\n}\n\n.modal button {\n  -webkit-appearance: none;\n     -moz-appearance: none;\n          appearance: none;\n  border-radius: 0;\n  box-shadow: none;\n  cursor: pointer;\n  display: inline-block;\n  font-size: 12px;\n  line-height: 1.8;\n  margin: 0 10px 0 0;\n  padding: 5px 10px;\n}\n\n.modal button:focus {\n  outline: none;\n}\n\n.modal button {\n  background-color: #1eaaf1;\n  border: none;\n  color: #fff;\n}\n\n.modal button:hover,\n.modal button.hover {\n  background-color: #346392;\n  text-shadow: -1px 1px #27496d;\n}\n\n.modal button:active,\n.modal button.active {\n  background-color: #27496d;\n  text-shadow: -1px 1px #193047;\n}\n\n.modal button:disabled {\n  background-color: #888;\n  cursor: none;\n}\n\n.newimage {\n  background-color: #323232;\n  color: #bcbcbc;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  font-size: 13px;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  margin-top: 10px;\n  overflow: auto;\n  padding: 10px;\n}\n\n.newimage input {\n  color: #1eaaf1;\n  padding: 3px 5px;\n}\n\n.hide {\n  display: none;\n}\n\nspan.value {\n  color: #fff;\n  display: inline-block;\n}\n\nspan.mixinlist {\n  color: #888 !important;\n  display: inline-block;\n}\n\nspan.mixinlist ul {\n  background-color: #222;\n  list-style-type: none;\n  margin: 5px 0 0;\n  padding: 5px;\n}\n\nspan.mixinlist ul li {\n  font-size: 11px;\n  margin-bottom: 3px;\n}\n\nspan.mixinlist ul li:last-child {\n  margin-bottom: 0;\n}\n\nspan.mixin {\n  display: inline-block;\n  width: 100px;\n}\n\n.mixinlist {\n  margin-left: 120px;\n}\n\nspan.subcomponent {\n  color: #999;\n  float: none !important;\n  margin-left: 10px;\n  vertical-align: top !important;\n}\n\n.collapsible .static {\n  cursor: pointer;\n}\n\n.a-canvas.state-dragging {\n  cursor: -webkit-grabbing;\n  cursor: grabbing;\n}\n\ncode,\npre,\ninput,\ntextarea,\nselect {\n  font-family: Consolas, Andale Mono, Monaco, Courier New, monospace;\n}\n\n.Select,\n.wf-active code,\n.wf-active pre,\n.wf-active input,\n.wf-active textarea,\n.wf-active select {\n  font-family: Roboto Mono, Consolas, Andale Mono, Monaco, Courier New, monospace;\n}\n\n.tagName {\n  font-weight: 500;\n}\n\n.sidebar-title {\n  background-color: #444;\n  color: #aaa;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  font-size: 12px;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  padding: 6px 10px;\n  position: relative;\n  text-align: center;\n}\n\n.toolbar {\n  background-color: #262626;\n  color: #333;\n  height: 32px;\n  position: relative;\n}\n\n.toolbar * {\n  margin-left: 0;\n  padding: 8px;\n  vertical-align: middle;\n}\n\n.toolbar a.button {\n  margin: 0 6px 0 0;\n}\n\n.toolbar .active {\n  background-color: #1faaf2;\n  color: #fff;\n}\n\n.toolbar .active:hover {\n  color: #fff !important;\n}\n\n.local-transform {\n  padding-left: 10px;\n}\n\n.local-transform label {\n  color: #aaa;\n  padding-left: 5px;\n}\n\n.local-transform a.button {\n  padding-top: 0;\n}\n\n.outliner {\n  background: #2b2b2b;\n  color: #868686;\n  cursor: default;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 auto;\n          flex: 1 1 auto;\n  font-size: 12px;\n  height: calc(100% - 98px);\n  outline: none;\n  overflow-y: auto;\n  padding: 0;\n  position: fixed;\n  top: 98px;\n  width: 230px;\n}\n\n.outliner .option {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  padding: 4px;\n  white-space: nowrap;\n}\n\n.outliner .option.active {\n  background-color: #1faaf2;\n  color: #fff;\n}\n\n.outliner .option .component:hover {\n  color: #1faaf2;\n}\n\n.outliner .option.active .component:hover {\n  color: #1888c1;\n}\n\n.outliner .option .icons {\n  display: none;\n  margin: 0 3px 0 10px;\n}\n\n.outliner .option .icons .button {\n  color: #fff;\n  font-size: 12px;\n}\n\n.outliner .option.active .icons {\n  display: inline;\n}\n\n.outliner .fa {\n  color: #aaa;\n}\n\n.outliner .active .fa {\n  color: #fff;\n}\n\na.flat-button {\n  background-color: #262626;\n  color: #bcbcbc;\n  font-size: 11px;\n  margin-left: 10px;\n  padding: 5px;\n  text-decoration: none;\n}\n\na.flat-button:hover {\n  color: #1faaf2;\n}\n\n.component-title {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n}\n\na.help-link {\n  opacity: 0.4;\n}\n\na.help-link:hover {\n  opacity: 1;\n}\n\n#right-panels {\n  -webkit-box-align: stretch;\n      -ms-flex-align: stretch;\n          align-items: stretch;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: end;\n      -ms-flex-pack: end;\n          justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  top: 0;\n}\n\n#aframe-inspector-panels {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n}\n\n/* This is a temporaly hack, we should style the editor instead of overwriting\n   the a-scene to fix the \"display: block\" issue. */\n\n.aframe-inspector-opened a-scene {\n  display: inline !important;\n}\n\n.aframe-inspector-opened a-scene .a-canvas {\n  background-color: #191919;\n  z-index: 9998;\n}\n\n.uploadcare-widget-button-open {\n  background-color: #1eaaf1;\n  border-radius: 0;\n  cursor: pointer;\n  margin-left: 10px;\n  padding: 10px 15px;\n}\n\n.uploadcare-widget-button-open:hover {\n  background-color: #346392;\n}\n\n.new_asset_options {\n  margin: 10px;\n}\n\n.new_asset_options > ul {\n  margin-left: 10px;\n  padding: 5px;\n}\n\n.new_asset_options > ul > li {\n  padding: 10px 0;\n}\n\n.new_asset_options .imageUrl {\n  margin-left: 5px;\n  width: 350px;\n}\n\nspan.entity-name {\n  color: #fff;\n  font-family: Consolas, Andale Mono, Monaco, Courier New, monospace;\n  font-size: 16px;\n}\n\n.add-component {\n  width: 200px;\n}\n\n.Select-control {\n  background-color: #222 !important;\n  border: none;\n  border-radius: 0;\n  color: #1faaf2;\n}\n\n.Select-menu-outer {\n  border: none;\n}\n\n.Select-menu-outer .is-focused {\n  background-color: #1faaf2 !important;\n  color: #fff;\n}\n\n.Select-option {\n  background-color: #222 !important;\n}\n\n.select-widget {\n  display: inline-block;\n  width: 157px;\n}\n\n.Select-placeholder,\n.Select--single > .Select-control .Select-value {\n  color: #1faaf2 !important;\n}\n\n.Select-value-label {\n  color: #1faaf2 !important;\n}\n\n.row .Select-control {\n  font-size: 11px;\n  height: 24px;\n}\n\n.row .Select-placeholder,\n.row .Select--single > .Select-control .Select-value {\n  line-height: 19px;\n}\n\n.row .Select-input {\n  height: 22px;\n}\n\n.row input[type=text],\n.row input[type=number],\n.row input.string,\n.row input.number {\n  background: #222;\n  border: 1px solid transparent;\n  color: #1faaf2;\n  min-height: 20px;\n  padding-left: 5px;\n  padding-right: 5px;\n}\n\n.row input.string {\n  box-sizing: border-box;\n  width: 165px;\n}\n\n.help-lists {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -ms-flex-pack: distribute;\n      justify-content: space-around;\n}\n\n.help-list {\n  list-style: none;\n  margin: 0;\n  padding: 0 0 10px;\n  width: 350px;\n}\n\n.help-list li {\n  margin-right: 40px;\n}\n\n.help-key-unit {\n  line-height: 1.8;\n  margin-right: 2em;\n  padding: 5px 0;\n}\n\n.help-key {\n  bottom: 2px;\n  margin-right: 4px;\n  min-width: 60px;\n  position: relative;\n}\n\n.help-key span {\n  background-color: #2e2e2e;\n  background-repeat: repeat-x;\n  border: 1px solid #666;\n  border-radius: 3px;\n  box-shadow: 0 0 5px #000;\n  color: #999;\n  display: inline-block;\n  font-size: 12px;\n  padding: 0 8px;\n  text-align: center;\n}\n\n.help-key-def {\n  color: #bbb;\n  display: inline-block;\n  margin-left: 1em;\n}\n\n.add-component {\n  text-align: left;\n}\n\n.add-component .option {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n}\n\n.add-component .option span {\n  color: #1faaf2;\n}\n\n.Select-menu-outer .is-focused span {\n  color: #fff;\n}\n\n.add-component-container {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  background-color: #2b2b2b;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  padding: 10px;\n}\n\n.aregistry-button {\n  font-size: 12px;\n  margin-left: 10px;\n  padding: 8px;\n}\n\n.aregistry-button:hover {\n  background-color: #1faaf2;\n}\n\n.aregistry-button img {\n  height: 20px;\n  width: 20px;\n}\n\n.components .row .color_value {\n  margin: 0 0 0 5px;\n  width: 68px;\n}\n\n.assets.search {\n  margin-top: 10px;\n  width: 200px;\n}\n\n.assets.search .fa-search {\n  top: 7px;\n}\n\n.gallery a.fa.texture-link {\n  box-shadow: 0 0 14px -1px rgba(0, 0, 0, 0.75);\n  position: fixed;\n}\n\n.outliner .id {\n  color: #ccc;\n}\n\n.outliner .option.active .id {\n  color: #fff;\n}\n\n.outliner .collasespace {\n  color: #eee;\n  display: inline-block;\n  text-align: center;\n  width: 14px;\n}\n\n.outliner .fa-eye {\n  color: #bbb;\n}\n\n.outliner .option {\n  white-space: pre;\n}\n\n.option span:first-child {\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.outliner .option.novisible span,\n.outliner .option.novisible .fa,\n.outliner .option.novisible .collasespace,\n.outliner .option.novisible .id {\n  color: #575757;\n}\n\n.outliner .option .icons a.button {\n  color: #fff;\n}\n\n.toggle-sidebar {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  height: 100%;\n  position: absolute;\n  z-index: 9998;\n}\n\n.toggle-sidebar.left {\n  left: 0;\n}\n\n.toggle-sidebar.right {\n  right: 0;\n}\n\n.toggle-sidebar a {\n  background-color: #262626;\n  color: #bcbcbc;\n  padding: 5px;\n  z-index: 9998;\n}\n\n.toggle-sidebar a:hover {\n  background-color: #1faaf2;\n  color: #fff;\n}\n", ""]);
+	exports.push([module.id, "body.aframe-inspector-opened,\n.toggle-edit {\n  font-family: BlinkMacSystemFont, -apple-system, \"Segoe UI\", Helvetica, Arial, sans-serif;\n}\n\n.wf-roboto-n4-active body.aframe-inspector-opened,\n.wf-roboto-n4-active .toggle-edit {\n  font-family: Roboto, BlinkMacSystemFont, -apple-system, \"Segoe UI\", Helvetica, Arial, sans-serif;\n}\n\n.Select,\ncode,\npre,\ninput,\ntextarea,\nselect {\n  font-family: Consolas, Andale Mono, Monaco, Courier New, monospace;\n}\n\n.wf-robotomono-n4-active .Select,\n.wf-robotomono-n4-active code,\n.wf-robotomono-n4-active pre,\n.wf-robotomono-n4-active input,\n.wf-robotomono-n4-active textarea,\n.wf-robotomono-n4-active select {\n  font-family: Roboto Mono, Consolas, Andale Mono, Monaco, Courier New, monospace;\n}\n\nbody.aframe-inspector-opened {\n  color: #fff;\n  font-size: 12px;\n  margin: 0;\n  overflow: hidden;\n}\n\nhr {\n  border: 0;\n  border-top: 1px solid #ccc;\n}\n\na {\n  cursor: pointer;\n}\n\nbutton {\n  position: relative;\n}\n\ncode {\n  font-family: Consolas, Andale Mono, Monaco, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;\n}\n\ntextarea {\n  -moz-tab-size: 4;\n    -o-tab-size: 4;\n       tab-size: 4;\n  white-space: pre;\n  word-wrap: normal;\n}\n\ntextarea.success {\n  border-color: #8b8 !important;\n}\n\ntextarea.fail {\n  background-color: rgba(255, 0, 0, 0.05);\n  border-color: #f00 !important;\n}\n\ntextarea,\ninput {\n  outline: none; /* osx */\n}\n\n#left-sidebar,\n#right-panels {\n  z-index: 9998;\n}\n\n#sidebar,\n#left-sidebar,\n.panel {\n  cursor: default;\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n}\n\n.collapsible .static {\n  margin: 0;\n}\n\n.collapsible .static .collapse-button {\n  border: 6px solid transparent;\n  float: left;\n  height: 0;\n  margin-right: 6px;\n  width: 0;\n}\n\n.collapsible.collapsed .static .collapse-button {\n  border-left-color: #1faaf2;\n  margin-top: 2px;\n}\n\n.collapsible:not(.collapsed) .static .collapse-button {\n  border-top-color: #1faaf2;\n  margin-top: 6px;\n}\n\n.collapsible.collapsed .content {\n  display: none;\n}\n\n.toggle-edit {\n  background-color: #ed3160;\n  color: #fff;\n  font-size: 12px;\n  left: 3px;\n  margin: 0;\n  padding: 6px 10px;\n  position: fixed;\n  text-align: center;\n  text-decoration: none;\n  top: 3px;\n  width: 204px;\n  z-index: 99999;\n}\n\n.toggle-edit:hover {\n  background-color: rgb(228, 43, 90);\n}\n\n.scenegraph {\n  border-top: 1px solid #111;\n  padding-top: 32px;\n}\n\n.scenegraph .search {\n  padding: 5px;\n}\n\n.scenegraph-toolbar {\n  background-color: #333;\n  position: fixed;\n  top: 32px;\n}\n\n.scenegraph-actions {\n  padding: 9px 0 5px;\n}\n\n.search {\n  color: #aaa;\n  font-size: 16px;\n  position: relative;\n}\n\n.search input {\n  background: #222;\n  border-radius: 5px;\n  height: 22px;\n  text-indent: 10px;\n  width: 216px;\n}\n\n.search .fa-search {\n  position: absolute;\n  right: 11px;\n  top: 10px;\n}\n\n.search .fa-times {\n  position: absolute;\n  right: 32px;\n  top: 10px;\n}\n\ninput {\n  background-color: transparent;\n  border: 1px solid #555;\n  color: #fff;\n}\n\ninput,\n.texture canvas {\n  -webkit-transition: 0.1s background-color ease-in-out, 0.1s border-color ease-in-out, 0.1s color ease-in-out;\n  transition: 0.1s background-color ease-in-out, 0.1s border-color ease-in-out, 0.1s color ease-in-out;\n}\n\ninput[type=text],\ninput[type=number],\ninput.string,\ninput.number {\n  min-height: 14px;\n  outline: none;\n}\n\ninput.number {\n  background-color: transparent !important;\n  border: 0;\n  color: #20b1fb !important;\n  cursor: col-resize;\n  font-size: 12px;\n  padding: 2px;\n}\n\ninput.string:focus,\ninput.number:focus {\n  border: 1px solid #20b1fb;\n  color: #fff;\n  cursor: auto;\n}\n\ninput.error {\n  border: 1px solid #a00;\n}\n\n#left-sidebar {\n  background: #2b2b2b;\n  bottom: 0;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  height: 100%;\n  left: 0;\n  overflow: auto;\n  position: fixed;\n  top: 0;\n  width: 230px;\n}\n\n#sidebar {\n  background: #2b2b2b;\n  width: 331px;\n}\n\n#sidebar * {\n  vertical-align: middle;\n}\n\ninput,\ntextarea,\nselect {\n  background: #222;\n  border: 1px solid transparent;\n  color: #888;\n}\n\n.row {\n  margin-bottom: 10px;\n  min-height: 20px;\n}\n\ninput[type=color] {\n  background-color: #333;\n  border: 1px solid #111;\n  cursor: pointer;\n}\n\n.texture canvas {\n  border: 1px solid #222;\n  cursor: pointer;\n}\n\n.texture canvas:hover {\n  border-color: #1faaf2;\n}\n\ninput[type=color] {\n  cursor: pointer;\n  height: 16px;\n  padding: 0;\n  width: 64px;\n}\n\n/* Note: these vendor-prefixed selectors cannot be grouped! */\n\ninput[type=color]::-webkit-color-swatch {\n  border: 0;  /* To remove the gray border. */\n}\n\ninput[type=color]::-webkit-color-swatch-wrapper {\n  padding: 0;  /* To remove the inner padding. */\n}\n\ninput[type=color]::-moz-color-swatch {\n  border: 0;\n}\n\ninput[type=color]::-moz-focus-inner {\n  border: 0;  /* To remove the inner border (specific to Firefox). */\n  padding: 0;\n}\n\n.components {\n  background-color: #323232;\n  color: #bcbcbc;\n  height: 100%;\n  overflow: auto;\n  position: fixed;\n  width: 331px;\n}\n\ndiv.vec2,\ndiv.vec3,\ndiv.vec4 {\n  display: inline;\n}\n\n.vec2 input.number,\n.vec3 input.number {\n  width: 46px;\n}\n\n.vec4 input.number {\n  width: 34px;\n}\n\n.collapsible-header {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n}\n\n.component-title span {\n  float: left;\n  max-width: 110px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  text-transform: uppercase;\n  white-space: nowrap;\n}\n\n.collapsible .static {\n  background-color: #323232;\n  border-bottom: 1px solid #262626;\n  border-top: 1px solid #262626;\n  color: #fff;\n  height: 16px;\n  padding: 10px;\n  vertical-align: middle;\n}\n\n.collapsible .menu {\n  text-align: right;\n}\n\n.collapsible .menu::after {\n  color: #bbb;\n  content: '\\2807';\n  font-size: 12px;\n  padding: 5px;\n  text-align: right;\n}\n\n.collapsible .static .collapse-button {\n  border-left: 5px solid transparent;\n  border-right: 5px solid transparent;\n  float: left;\n  height: 0;\n  margin-right: 10px;\n  margin-top: 2px;\n  width: 0;\n}\n\n.collapsible.collapsed .static .collapse-button {\n  border-left-color: #bbb;\n}\n\n.collapsible:not(.collapsed) .static .collapse-button {\n  border-top-color: #bbb;\n}\n\n.collapsible .content {\n  background-color: #2b2b2b;\n  padding: 10px;\n}\n\n.components .row {\n  margin-bottom: 10px;\n  min-height: 20px;\n}\n\n.components * {\n  vertical-align: middle;\n}\n\n.components .row .text {\n  cursor: default;\n  display: inline-block;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  vertical-align: middle;\n  width: 120px;\n}\n\n.components .row .map_value {\n  margin: 0 0 0 5px;\n  width: 68px;\n}\n\n.hidden {\n  visibility: hidden;\n}\n\n.uploader-normal-button .hidden {\n  display: none;\n}\n\n.texture canvas + input {\n  margin-left: 5px;\n}\n\n.texture .fa {\n  padding-right: 5px;\n}\n\n.texture .fa-external-link {\n  font-size: 14px;\n  padding-top: 2px;\n}\n\n.scenegraph-bottom {\n  background-color: #323232;\n  border-top: 1px solid #111;\n  bottom: 10;\n  height: 40px;\n  left: 0;\n  z-index: 100;\n}\n\na.button {\n  color: #bcbcbc;\n  font-size: 16px;\n  margin-left: 10px;\n  text-decoration: none;\n}\n\na.button:hover {\n  color: #1faaf2;\n}\n\n.scenegraph-bottom a {\n  float: right;\n  margin: 10px;\n}\n\n.modal {\n  -webkit-animation: animateopacity 0.2s ease-out;\n          animation: animateopacity 0.2s ease-out;\n  background-color: rgb(0, 0, 0);\n  background-color: rgba(0, 0, 0, 0.6);\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  height: 100%;\n  left: 0;\n  overflow: auto;\n  position: fixed;\n  top: 0;\n  width: 100%;\n  z-index: 9999;\n}\n\n.modal h3 {\n  font-size: 18px;\n  font-weight: 100;\n  margin: 0.6em 0;\n}\n\n#texture-modal .modal-content {\n  height: calc(100% - 50px);\n  width: calc(100% - 50px);\n}\n\n.modal-content {\n  -webkit-animation: animatetop 0.2s ease-out;\n          animation: animatetop 0.2s ease-out;\n  -webkit-animation-duration: 0.2s;\n          animation-duration: 0.2s;\n  -webkit-animation-name: animatetop;\n          animation-name: animatetop;\n  background-color: #232323;\n  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5), 0 6px 20px 0 rgba(0, 0, 0, 0.5);\n  margin: auto;\n  overflow: hidden;\n  padding: 0;\n}\n\n@-webkit-keyframes animateopacity {\n  from { opacity: 0; }\n  to { opacity: 1; }\n}\n\n@keyframes animateopacity {\n  from { opacity: 0; }\n  to { opacity: 1; }\n}\n\n.close {\n  color: white;\n  float: right;\n  font-size: 28px;\n  font-weight: bold;\n}\n\n.close:hover,\n.close:focus {\n  color: #08f;\n  cursor: pointer;\n  text-decoration: none;\n}\n\n.modal-header {\n  color: white;\n  padding: 2px 16px;\n}\n\n.modal-body {\n  overflow: auto;\n  padding: 16px;\n}\n\n.modal-footer {\n  color: white;\n  padding: 2px 16px;\n}\n\n/* Gallery */\n\n.gallery {\n  background: #232323;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  margin: 15px auto 0;\n  max-height: 50vh;\n  overflow: auto;\n  padding: 15px 3px 3px;\n}\n\n.newimage .gallery {\n  padding: 16px;\n}\n\n.gallery li {\n  border-radius: 2px;\n  box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);\n  cursor: pointer;\n  margin: 8px;\n  overflow: hidden;\n  width: 155px;\n}\n\n.gallery li.selected,\n.gallery li:hover {\n  box-shadow: 0 0 0 2px #1eaaf1;\n}\n\n.gallery li .detail {\n  background-color: #323232;\n  margin: 0;\n  min-height: 60px;\n  padding: 3px 10px;\n}\n\n.gallery li .button.fa-external-link {\n  margin-left: 136px;\n  margin-top: 5px;\n  position: fixed;\n}\n\n.preview {\n  padding: 10px;\n  width: 150px;\n}\n\n.preview input {\n  display: block;\n  margin: 8px 0;\n  width: 144px;\n}\n\n.preview button {\n  width: 155px;\n}\n\n.preview .detail .title {\n  color: #fff;\n  display: inline-block;\n  max-width: 155px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.gallery li.selected .detail,\n.gallery li:hover .detail {\n  background-color: #444;\n}\n\n.gallery li .detail span {\n  color: #777;\n  display: block;\n  margin-top: 4px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n  width: 140px;\n}\n\n.gallery li.selected .detail span,\n.gallery li:hover .detail span {\n  color: #888;\n}\n\n.gallery li .detail span.title {\n  color: #fff !important;\n}\n\n.modal button {\n  -webkit-appearance: none;\n     -moz-appearance: none;\n          appearance: none;\n  border-radius: 0;\n  box-shadow: none;\n  cursor: pointer;\n  display: inline-block;\n  font-size: 12px;\n  line-height: 1.8;\n  margin: 0 10px 0 0;\n  padding: 5px 10px;\n}\n\n.modal button:focus {\n  outline: none;\n}\n\n.modal button {\n  background-color: #1eaaf1;\n  border: none;\n  color: #fff;\n}\n\n.modal button:hover,\n.modal button.hover {\n  background-color: #346392;\n  text-shadow: -1px 1px #27496d;\n}\n\n.modal button:active,\n.modal button.active {\n  background-color: #27496d;\n  text-shadow: -1px 1px #193047;\n}\n\n.modal button:disabled {\n  background-color: #888;\n  cursor: none;\n}\n\n.newimage {\n  background-color: #323232;\n  color: #bcbcbc;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  font-size: 13px;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  margin-top: 10px;\n  overflow: auto;\n  padding: 10px;\n}\n\n.newimage input {\n  color: #1eaaf1;\n  padding: 3px 5px;\n}\n\n.hide {\n  display: none;\n}\n\nspan.value {\n  color: #fff;\n  display: inline-block;\n}\n\nspan.mixinlist {\n  color: #888 !important;\n  display: inline-block;\n}\n\nspan.mixinlist ul {\n  background-color: #222;\n  list-style-type: none;\n  margin: 5px 0 0;\n  padding: 5px;\n}\n\nspan.mixinlist ul li {\n  font-size: 11px;\n  margin-bottom: 3px;\n}\n\nspan.mixinlist ul li:last-child {\n  margin-bottom: 0;\n}\n\nspan.mixin {\n  display: inline-block;\n  width: 100px;\n}\n\n.mixinlist {\n  margin-left: 120px;\n}\n\nspan.subcomponent {\n  color: #999;\n  float: none !important;\n  margin-left: 10px;\n  vertical-align: top !important;\n}\n\n.collapsible .static {\n  cursor: pointer;\n}\n\n.a-canvas.state-dragging {\n  cursor: -webkit-grabbing;\n  cursor: grabbing;\n}\n\n.tagName {\n  font-weight: 500;\n}\n\n.sidebar-title {\n  background-color: #444;\n  color: #aaa;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  font-size: 12px;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  padding: 6px 10px;\n  position: relative;\n  text-align: center;\n}\n\n.toolbar {\n  background-color: #262626;\n  color: #333;\n  height: 32px;\n  position: relative;\n}\n\n.toolbar * {\n  margin-left: 0;\n  padding: 8px;\n  vertical-align: middle;\n}\n\n.toolbar a.button {\n  margin: 0 6px 0 0;\n}\n\n.toolbar .active {\n  background-color: #1faaf2;\n  color: #fff;\n}\n\n.toolbar .active:hover {\n  color: #fff !important;\n}\n\n.local-transform {\n  padding-left: 10px;\n}\n\n.local-transform label {\n  color: #aaa;\n  padding-left: 5px;\n}\n\n.local-transform a.button {\n  padding-top: 0;\n}\n\n.outliner {\n  background: #2b2b2b;\n  color: #868686;\n  cursor: default;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 auto;\n          flex: 1 1 auto;\n  font-size: 12px;\n  height: calc(100% - 98px);\n  outline: none;\n  overflow-y: auto;\n  padding: 0;\n  position: fixed;\n  top: 98px;\n  width: 230px;\n}\n\n.outliner .option {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  padding: 4px;\n  white-space: nowrap;\n}\n\n.outliner .option.active {\n  background-color: #1faaf2;\n  color: #fff;\n}\n\n.outliner .option .component:hover {\n  color: #1faaf2;\n}\n\n.outliner .option.active .component:hover {\n  color: #1888c1;\n}\n\n.outliner .option .icons {\n  display: none;\n  margin: 0 3px 0 10px;\n}\n\n.outliner .option .icons .button {\n  color: #fff;\n  font-size: 12px;\n}\n\n.outliner .option.active .icons {\n  display: inline;\n}\n\n.outliner .fa {\n  color: #aaa;\n}\n\n.outliner .active .fa {\n  color: #fff;\n}\n\na.flat-button {\n  background-color: #262626;\n  color: #bcbcbc;\n  font-size: 11px;\n  margin-left: 10px;\n  padding: 5px;\n  text-decoration: none;\n}\n\na.flat-button:hover {\n  color: #1faaf2;\n}\n\n.component-title {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n}\n\na.help-link {\n  opacity: 0.4;\n}\n\na.help-link:hover {\n  opacity: 1;\n}\n\n#right-panels {\n  -webkit-box-align: stretch;\n      -ms-flex-align: stretch;\n          align-items: stretch;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: end;\n      -ms-flex-pack: end;\n          justify-content: flex-end;\n  position: fixed;\n  right: 0;\n  top: 0;\n}\n\n#aframe-inspector-panels {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n}\n\n/* This is a temporaly hack, we should style the editor instead of overwriting\n   the a-scene to fix the \"display: block\" issue. */\n\n.aframe-inspector-opened a-scene {\n  display: inline !important;\n}\n\n.aframe-inspector-opened a-scene .a-canvas {\n  background-color: #191919;\n  z-index: 9998;\n}\n\n.uploadcare-widget-button-open {\n  background-color: #1eaaf1;\n  border-radius: 0;\n  cursor: pointer;\n  margin-left: 10px;\n  padding: 10px 15px;\n}\n\n.uploadcare-widget-button-open:hover {\n  background-color: #346392;\n}\n\n.new_asset_options {\n  margin: 10px;\n}\n\n.new_asset_options > ul {\n  margin-left: 10px;\n  padding: 5px;\n}\n\n.new_asset_options > ul > li {\n  padding: 10px 0;\n}\n\n.new_asset_options .imageUrl {\n  margin-left: 5px;\n  width: 350px;\n}\n\nspan.entity-name {\n  color: #fff;\n  font-family: Consolas, Andale Mono, Monaco, Courier New, monospace;\n  font-size: 16px;\n}\n\n.add-component {\n  width: 200px;\n}\n\n.Select-control {\n  background-color: #222 !important;\n  border: none;\n  border-radius: 0;\n  color: #1faaf2;\n}\n\n.Select-menu-outer {\n  border: none;\n}\n\n.Select-menu-outer .is-focused {\n  background-color: #1faaf2 !important;\n  color: #fff;\n}\n\n.Select-option {\n  background-color: #222 !important;\n}\n\n.select-widget {\n  display: inline-block;\n  width: 157px;\n}\n\n.Select-placeholder,\n.Select--single > .Select-control .Select-value {\n  color: #1faaf2 !important;\n}\n\n.Select-value-label {\n  color: #1faaf2 !important;\n}\n\n.row .Select-control {\n  font-size: 11px;\n  height: 24px;\n}\n\n.row .Select-placeholder,\n.row .Select--single > .Select-control .Select-value {\n  line-height: 19px;\n}\n\n.row .Select-input {\n  height: 22px;\n}\n\n.row input[type=text],\n.row input[type=number],\n.row input.string,\n.row input.number {\n  background: #222;\n  border: 1px solid transparent;\n  color: #1faaf2;\n  min-height: 20px;\n  padding-left: 5px;\n  padding-right: 5px;\n}\n\n.row input.string {\n  box-sizing: border-box;\n  width: 165px;\n}\n\n.help-lists {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -ms-flex-pack: distribute;\n      justify-content: space-around;\n}\n\n.help-list {\n  list-style: none;\n  margin: 0;\n  padding: 0 0 10px;\n  width: 350px;\n}\n\n.help-list li {\n  margin-right: 40px;\n}\n\n.help-key-unit {\n  line-height: 1.8;\n  margin-right: 2em;\n  padding: 5px 0;\n}\n\n.help-key {\n  bottom: 2px;\n  margin-right: 4px;\n  min-width: 60px;\n  position: relative;\n}\n\n.help-key span {\n  background-color: #2e2e2e;\n  background-repeat: repeat-x;\n  border: 1px solid #666;\n  border-radius: 3px;\n  box-shadow: 0 0 5px #000;\n  color: #999;\n  display: inline-block;\n  font-size: 12px;\n  padding: 0 8px;\n  text-align: center;\n}\n\n.help-key-def {\n  color: #bbb;\n  display: inline-block;\n  margin-left: 1em;\n}\n\n.add-component {\n  text-align: left;\n}\n\n.add-component .option {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n}\n\n.add-component .option span {\n  color: #1faaf2;\n}\n\n.Select-menu-outer .is-focused span {\n  color: #fff;\n}\n\n.add-component-container {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  background-color: #2b2b2b;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  padding: 10px;\n}\n\n.aregistry-button {\n  font-size: 12px;\n  margin-left: 10px;\n  padding: 8px;\n}\n\n.aregistry-button:hover {\n  background-color: #1faaf2;\n}\n\n.aregistry-button img {\n  height: 20px;\n  width: 20px;\n}\n\n.components .row .color_value {\n  margin: 0 0 0 5px;\n  width: 68px;\n}\n\n.assets.search {\n  margin-top: 10px;\n  width: 200px;\n}\n\n.assets.search .fa-search {\n  top: 7px;\n}\n\n.gallery a.fa.texture-link {\n  box-shadow: 0 0 14px -1px rgba(0, 0, 0, 0.75);\n  position: fixed;\n}\n\n.outliner .id {\n  color: #ccc;\n}\n\n.outliner .option.active .id {\n  color: #fff;\n}\n\n.outliner .collasespace {\n  color: #eee;\n  display: inline-block;\n  text-align: center;\n  width: 14px;\n}\n\n.outliner .fa-eye {\n  color: #bbb;\n}\n\n.outliner .option {\n  white-space: pre;\n}\n\n.option span:first-child {\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.outliner .option.novisible span,\n.outliner .option.novisible .fa,\n.outliner .option.novisible .collasespace,\n.outliner .option.novisible .id {\n  color: #575757;\n}\n\n.outliner .option .icons a.button {\n  color: #fff;\n}\n\n.toggle-sidebar {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  height: 100%;\n  position: absolute;\n  z-index: 9998;\n}\n\n.toggle-sidebar.left {\n  left: 0;\n}\n\n.toggle-sidebar.right {\n  right: 0;\n}\n\n.toggle-sidebar a {\n  background-color: #262626;\n  color: #bcbcbc;\n  padding: 5px;\n  z-index: 9998;\n}\n\n.toggle-sidebar a:hover {\n  background-color: #1faaf2;\n  color: #fff;\n}\n", ""]);
 
 	// exports
 
 
 /***/ },
-/* 247 */
+/* 250 */
 /***/ function(module, exports) {
 
 	'use strict';
